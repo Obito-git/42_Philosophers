@@ -1,6 +1,7 @@
 #include "../philo.h"
 
 static t_bool	check_numbformat(char **av, t_settings *set)
+
 {
 	if (set->time_to_die == 0
 		&& (ft_strlen(av[2]) != 1 || av[2][0] != '0'))

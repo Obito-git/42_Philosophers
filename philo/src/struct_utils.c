@@ -11,8 +11,6 @@ t_philo *philo_init(int id, int time_to_death)
     p->left = NULL;
     p->rigth = NULL;
     p->time_to_death = time_to_death;
-    p->time_to_eat = 0;
-    p->time_to_sleep = 0;
     return (p);
 }
 
@@ -39,6 +37,10 @@ t_settings  *set_settings(int philo, int die, int eat, int sleep)
     s->time_to_die = die;
     s->time_to_eat = eat;
     s->time_to_sleep = sleep;
+    s->are_alive = NULL;
+    s->ms_from_start = NULL;
+    s->philo = NULL;
+    s->forks = NULL;
     return (s);
 }
 

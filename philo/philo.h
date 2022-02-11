@@ -16,6 +16,10 @@ typedef struct s_settings
     int time_to_die;
     int time_to_eat;
     int time_to_sleep;
+    long    *ms_from_start;
+    long          *are_alive;
+    struct s_fork   **forks;
+    struct s_philo  *philo;
 } t_settings;
 
 typedef struct s_fork
@@ -32,8 +36,6 @@ typedef struct s_philo
     struct s_fork   *left;
     struct s_fork   *rigth;
     int             time_to_death;
-    int             time_to_eat;
-    int             time_to_sleep;
 } t_philo;
 
 t_settings  *set_settings(int philo, int die, int eat, int sleep);
@@ -42,6 +44,9 @@ t_philo *philo_init(int id, int time_to_death);
 t_settings	*parse_args(char **av);
 void    free_forks(t_fork **forks, int count);
 void    free_philos(t_philo **philo, int count);
+void	set_and_start_threads(t_philo **p, t_fork **f, t_settings *s);
+void	*routine(void *arg);
+long	get_current_time_ms(void);
 
 
 #endif

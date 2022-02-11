@@ -65,7 +65,7 @@ int main(int ac, char **av)
         free(set);
         return (1);
     }
-    //start
+    set_and_start_threads(philos, forks, set);
     free_forks(forks, set->number_of_philo);
     free_philos(philos, set->number_of_philo);
     free(set);

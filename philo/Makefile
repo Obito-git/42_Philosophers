@@ -4,7 +4,8 @@ CFLAGS = -Wall -Werror -Wextra -pthread
 LIBFT=$(SRC_PATH)libft_utils/
 SRC_PATH=src/
 
-SRCS = $(SRC_PATH)philo.c $(SRC_PATH)parsing.c $(SRC_PATH)struct_utils.c $(SRC_PATH)algo.c
+SRCS =	$(SRC_PATH)philo.c $(SRC_PATH)parsing.c $(SRC_PATH)struct_utils.c \
+		$(SRC_PATH)algo.c $(SRC_PATH)utils.c $(SRC_PATH)threads.c
 
 OBJS = $(SRCS:.c=.o)
 
