@@ -12,6 +12,7 @@ typedef int     t_bool;
 
 typedef struct s_settings
 {
+    pthread_mutex_t *mutex;
     int number_of_philo;
     int time_to_die;
     int time_to_eat;

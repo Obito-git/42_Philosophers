@@ -31,13 +31,17 @@ t_settings **set_thread_args(t_philo **p, t_fork **f, t_settings *s, long *t)
 void	start_and_wait(t_philo **p, t_settings **args, t_settings *s)
 {
 	int	i;
+	pthread_mutex_t	mutex;
 
 	i = 0;
 
 	if (!args)
 		ft_printf("Malloc error!\n");
+	pthread_mutex_init(&mutex, NULL); //protection
 	while (args && i < s->number_of_philo)
 	{
+		args[i]->mutex = &mutex;
+		*args[i]->ms_from_start = get_current_time_ms();
 		if (pthread_create(&p[i]->thread, NULL, &routine, args[i]) != 0)
 			perror("failed to created thread\n");
 		i++;
@@ -49,6 +53,7 @@ void	start_and_wait(t_philo **p, t_settings **args, t_settings *s)
 			perror("Failed to join thread\n"); //FIXME
 		i++;
 	}
+	pthread_mutex_destroy(&mutex);
 	i = 0;
 	while (args && i < s->number_of_philo)
 		free(args[i++]);
