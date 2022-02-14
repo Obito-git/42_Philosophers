@@ -29,7 +29,7 @@ void	take_rigth_fork(t_settings *s)
 	}
 }
 
-t_bool	take_fork(t_settings *s)
+void	take_fork(t_settings *s)
 {
 	if (s->philo->id % 2 == 0)
 	{
@@ -41,14 +41,14 @@ t_bool	take_fork(t_settings *s)
 		take_left_fork(s);
 		take_rigth_fork(s);
 	}
-	return (s->philo->left && s->philo->rigth);
 }
 
 void set_philo_deathtime(t_settings *s, long start)
 {
+	pthread_mutex_lock(s->death);
 	if (*s->are_alive)
 	{
-		s->philo->time_to_death -= (int) (get_current_time_ms() - start);
+		s->philo->time_to_death -= (get_current_time_ms() - start);
 		if (*s->are_alive && s->philo->time_to_death < 0)
 		{
 			printf("%ld %d died\n", get_current_time_ms() - *s->ms_from_start,
@@ -56,33 +56,37 @@ void set_philo_deathtime(t_settings *s, long start)
 			*s->are_alive = 0;
 		}
 	}
+	pthread_mutex_unlock(s->death);
 }
 
 //TODO sleep and eat t_boll for and call are_alive from calling function
-t_bool	go_sleep(t_settings *s)
+void	go_sleep(t_settings *s)
 {
 	long	start_sleeping;
 
 	start_sleeping = get_current_time_ms();
 	if (*s->are_alive)
 	{
-		printf("%d %d is sleeping\n", (int) (start_sleeping
-			- *s->ms_from_start), s->philo->id);
+		pthread_mutex_lock(s->print);
+		printf("%ld %d is sleeping\n", start_sleeping - *s->ms_from_start, s->philo->id);
+		pthread_mutex_unlock(s->print);
 		while (*s->are_alive && get_current_time_ms() - start_sleeping < s->time_to_sleep)
 		{
 			usleep(1);
 			if (get_current_time_ms() - start_sleeping > s->philo->time_to_death)
-				return (FALSE);
+				break ;
 		}
 		set_philo_deathtime(s, start_sleeping);
 	}
 	if (*s->are_alive)
-		printf("%d %d is thinking\n", (int) (get_current_time_ms()
-			- *s->ms_from_start), s->philo->id);
-	return (TRUE);
+	{
+		pthread_mutex_lock(s->print);
+		printf("%ld %d is thinking\n", get_current_time_ms() - *s->ms_from_start, s->philo->id);
+		pthread_mutex_unlock(s->print);
+	}
 }
 
-t_bool	go_eat_and_sleep(t_settings *s)
+void	go_eat(t_settings *s)
 {
 	long	start_eating;
 
@@ -90,46 +94,55 @@ t_bool	go_eat_and_sleep(t_settings *s)
 	{
 		s->philo->time_to_death = s->time_to_die;
 		start_eating = get_current_time_ms();
-		printf("%d %d is eating\n", (int) (start_eating
-			- *s->ms_from_start), s->philo->id);
+		pthread_mutex_lock(s->print);
+		printf("%ld %d is eating\n", start_eating - *s->ms_from_start, s->philo->id);
+		pthread_mutex_unlock(s->print);
 		while (*s->are_alive && get_current_time_ms() - start_eating < s->time_to_eat)
 		{
 			usleep(1);
 			if (get_current_time_ms() - start_eating > s->philo->time_to_death)
-				return (FALSE);
+				break ;
 		}
-		s->philo->left->isfree = TRUE;
-		s->philo->rigth->isfree = TRUE;
+		if (s->philo->id % 2 == 0)
+		{
+			s->philo->left->isfree = TRUE;
+			s->philo->rigth->isfree = TRUE;
+		}
+		else
+		{
+			s->philo->rigth->isfree = TRUE;
+			s->philo->left->isfree = TRUE;
+		}
 		s->philo->left = NULL;
 		s->philo->rigth = NULL;
 		set_philo_deathtime(s, start_eating);
 	}
-	return (go_sleep(s));
 }
-
 
 void	*routine(void *arg)
 {
-	//TODO USLEEP INTAGRATION IN LOOPS FOR OPTIMISATION
-	t_settings	*s;
+	t_settings		*s;
 	long			think_start;
 
 	s = (t_settings *) arg;
-
 	while (*s->are_alive)
 	{
-
 		think_start = get_current_time_ms();
-		usleep(1);
 		pthread_mutex_lock(s->mutex);
 		take_fork(s);
 		pthread_mutex_unlock(s->mutex);
 		set_philo_deathtime(s, think_start);
-
-
+		think_start = get_current_time_ms();
 		if (*s->are_alive && s->philo->left && s->philo->rigth)
-			go_eat_and_sleep(s);
+		{
+			go_eat(s);
+			go_sleep(s);
+		}
+		else
+		{
+			usleep(1);
+			set_philo_deathtime(s, think_start);
+		}
 	}
-
 	return (NULL);
 }

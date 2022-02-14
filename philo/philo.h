@@ -13,8 +13,10 @@ typedef int     t_bool;
 typedef struct s_settings
 {
     pthread_mutex_t *mutex;
+    pthread_mutex_t *print;
+    pthread_mutex_t *death;
     int number_of_philo;
-    int time_to_die;
+    long time_to_die;
     int time_to_eat;
     int time_to_sleep;
     long    *ms_from_start;
@@ -36,7 +38,7 @@ typedef struct s_philo
     int             id;
     struct s_fork   *left;
     struct s_fork   *rigth;
-    int             time_to_death;
+    long             time_to_death;
 } t_philo;
 
 t_settings  *set_settings(int philo, int die, int eat, int sleep);
