@@ -28,6 +28,22 @@ t_settings **set_thread_args(t_philo **p, t_fork **f, t_settings *s, long *t)
 	return (res);
 }
 
+void	dinner_end(t_philo **p, t_settings **args, t_settings *s)
+{
+	int	i;
+
+	i = 0;
+	while (args && i < s->number_of_philo)
+	{
+		if (pthread_join(p[i]->thread, NULL) != 0)
+			perror("Failed to join thread\n"); //FIXME
+		i++;
+	}
+	pthread_mutex_destroy(args[0]->mutex);
+	pthread_mutex_destroy(args[0]->print);
+	pthread_mutex_destroy(args[0]->death);
+}
+
 void	start_and_wait(t_philo **p, t_settings **args, t_settings *s)
 {
 	int	i;
@@ -36,7 +52,6 @@ void	start_and_wait(t_philo **p, t_settings **args, t_settings *s)
 	pthread_mutex_t	death;
 
 	i = 0;
-
 	if (!args)
 		ft_printf("Malloc error!\n");
 	pthread_mutex_init(&mutex, NULL); //protection
@@ -51,16 +66,6 @@ void	start_and_wait(t_philo **p, t_settings **args, t_settings *s)
 			perror("failed to created thread\n");
 		i++;
 	}
-	i = 0;
-	while (args && i < s->number_of_philo)
-	{
-		if (pthread_join(p[i]->thread, NULL) != 0)
-			perror("Failed to join thread\n"); //FIXME
-		i++;
-	}
-	pthread_mutex_destroy(&mutex);
-	pthread_mutex_destroy(&print);
-	pthread_mutex_destroy(&death);
 	i = 0;
 	while (args && i < s->number_of_philo)
 		free(args[i++]);

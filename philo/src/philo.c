@@ -30,21 +30,6 @@ t_bool  philo_fork_init(t_philo **phils, t_fork **forks, t_settings *set)
 
 int main(int ac, char **av)
 {
-    /*
-    struct timeval tv;
-    while (1)
-    {
-        gettimeofday(&tv, NULL);
-        long long milliseconds = tv.tv_sec*1000LL + tv.tv_usec/1000;
-        if ((milliseconds / 1000) % 10 == 0)
-        {
-            printf("10 sec\n");
-            sleep(2);
-        }
-    }
-    (void) ac;
-    (void) av;
-    */
     t_settings  *set;
     t_philo     **philos;
     t_fork      **forks;
@@ -61,7 +46,6 @@ int main(int ac, char **av)
     forks = (t_fork **) malloc(sizeof(t_fork) * set->number_of_philo);
     if (!philo_fork_init(philos, forks, set))
     {
-        ft_printf("Malloc error!\n");
         free(set);
         return (1);
     }
