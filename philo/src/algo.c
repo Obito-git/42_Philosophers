@@ -84,7 +84,7 @@ void	go_sleep(t_settings *s)
 		pthread_mutex_unlock(s->print);
 		while (*s->are_alive && get_current_time_ms() - start_sleeping < s->time_to_sleep)
 		{
-			usleep(1);
+			usleep(100);
 			if (get_current_time_ms() - start_sleeping > s->philo->time_to_death)
 				break ;
 		}
@@ -109,7 +109,7 @@ void	go_eat(t_settings *s)
 			printf("%ld %d is eating\n", start_eating - *s->ms_from_start, s->philo->id);
 		while (*s->are_alive && get_current_time_ms() - start_eating < s->time_to_eat)
 		{
-			usleep(1);
+			usleep(100);
 			if (get_current_time_ms() - start_eating > s->philo->time_to_death)
 				break ;
 		}
@@ -148,7 +148,7 @@ void	*routine(void *arg)
 		}
 		else
 		{
-			usleep(1);
+			usleep(100);
 			set_philo_deathtime(s, think_start);
 		}
 	}
