@@ -1,9 +1,7 @@
 #include "../philo.h"
-void	take_left_fork(t_settings *s)
+void	take_left_fork(t_settings *s, int left)
 {
-	int			left;
 
-	left = s->philo->id;
 	if (*s->are_alive && !s->philo->left && s->forks[left]->isfree)
 	{
 		s->forks[left]->isfree = FALSE;
@@ -13,13 +11,9 @@ void	take_left_fork(t_settings *s)
 	}
 }
 
-void	take_rigth_fork(t_settings *s)
+void	take_rigth_fork(t_settings *s, int right)
 {
-	int			right;
 
-	right = s->philo->id - 1;
-	if (right < 0)
-		right = s->number_of_philo - 1;
 	if (*s->are_alive && !s->philo->rigth && s->forks[right]->isfree)
 	{
 		s->forks[right]->isfree = FALSE;
@@ -31,15 +25,32 @@ void	take_rigth_fork(t_settings *s)
 
 void	take_fork(t_settings *s)
 {
-	if (s->philo->id % 2 == 0)
+	int			right;
+
+	right = s->philo->id - 1;
+	if (right < 0)
+		right = s->number_of_philo - 1;
+	int			left;
+	left = s->philo->id;
+	if (s->philo->id % 2 == 0 && s->philo->id + 1 != s->number_of_philo)
 	{
-		take_rigth_fork(s);
-		take_left_fork(s);
+		pthread_mutex_lock(s->mutex);
+		if (s->forks[left]->isfree && s->forks[right]->isfree)
+		{
+			take_rigth_fork(s, right);
+			take_left_fork(s, left);
+		}
+		pthread_mutex_unlock(s->mutex);
 	}
 	else
 	{
-		take_left_fork(s);
-		take_rigth_fork(s);
+		pthread_mutex_lock(s->mutex);
+		if (s->forks[left]->isfree && s->forks[right]->isfree)
+		{
+			take_left_fork(s, left);
+			take_rigth_fork(s, right);
+		}
+		pthread_mutex_unlock(s->mutex);
 	}
 }
 
@@ -68,7 +79,8 @@ void	go_sleep(t_settings *s)
 	if (*s->are_alive)
 	{
 		pthread_mutex_lock(s->print);
-		printf("%ld %d is sleeping\n", start_sleeping - *s->ms_from_start, s->philo->id);
+		if (*s->are_alive)
+			printf("%ld %d is sleeping\n", start_sleeping - *s->ms_from_start, s->philo->id);
 		pthread_mutex_unlock(s->print);
 		while (*s->are_alive && get_current_time_ms() - start_sleeping < s->time_to_sleep)
 		{
@@ -76,14 +88,13 @@ void	go_sleep(t_settings *s)
 			if (get_current_time_ms() - start_sleeping > s->philo->time_to_death)
 				break ;
 		}
-		set_philo_deathtime(s, start_sleeping);
 	}
+	pthread_mutex_lock(s->print);
 	if (*s->are_alive)
-	{
-		pthread_mutex_lock(s->print);
 		printf("%ld %d is thinking\n", get_current_time_ms() - *s->ms_from_start, s->philo->id);
-		pthread_mutex_unlock(s->print);
-	}
+	pthread_mutex_unlock(s->print);
+	usleep(500);
+	set_philo_deathtime(s, start_sleeping);
 }
 
 void	go_eat(t_settings *s)
@@ -94,9 +105,8 @@ void	go_eat(t_settings *s)
 	{
 		s->philo->time_to_death = s->time_to_die;
 		start_eating = get_current_time_ms();
-		pthread_mutex_lock(s->print);
-		printf("%ld %d is eating\n", start_eating - *s->ms_from_start, s->philo->id);
-		pthread_mutex_unlock(s->print);
+		if (*s->are_alive)
+			printf("%ld %d is eating\n", start_eating - *s->ms_from_start, s->philo->id);
 		while (*s->are_alive && get_current_time_ms() - start_eating < s->time_to_eat)
 		{
 			usleep(1);
@@ -128,9 +138,7 @@ void	*routine(void *arg)
 	while (*s->are_alive)
 	{
 		think_start = get_current_time_ms();
-		pthread_mutex_lock(s->mutex);
 		take_fork(s);
-		pthread_mutex_unlock(s->mutex);
 		set_philo_deathtime(s, think_start);
 		think_start = get_current_time_ms();
 		if (*s->are_alive && s->philo->left && s->philo->rigth)
