@@ -9,7 +9,7 @@ t_bool  philo_fork_init(t_philo **phils, t_fork **forks, t_settings *set)
         return (FALSE);
     while (i < set->number_of_philo)
     {
-        phils[i] = philo_init(i, set->time_to_die);
+        phils[i] = philo_init(i, set->time_to_die, set->times_eat);
         forks[i] = fork_init(i);
         if (!forks[i] || !phils[i])
         {
@@ -34,18 +34,19 @@ int main(int ac, char **av)
     t_philo     **philos;
     t_fork      **forks;
 
-    if (ac != 5)
+    if (ac != 5 && ac != 6)
     {
         ft_printf("Wrong args count\n");
         return (1);
     }
-    set = parse_args(av);
+    set = parse_args(ac, av);
     if (!set)
         return (1);
     philos = (t_philo **) malloc(sizeof(t_philo) * set->number_of_philo);
     forks = (t_fork **) malloc(sizeof(t_fork) * set->number_of_philo);
     if (!philo_fork_init(philos, forks, set))
     {
+        ft_printf("Malloc error!\n");
         free(set);
         return (1);
     }

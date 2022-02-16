@@ -1,6 +1,6 @@
 #include "../philo.h"
 
-t_philo *philo_init(int id, int time_to_death)
+t_philo *philo_init(int id, int time_to_death, int times_eat)
 {
     t_philo *p;
 
@@ -11,6 +11,7 @@ t_philo *philo_init(int id, int time_to_death)
     p->left = NULL;
     p->rigth = NULL;
     p->time_to_death = time_to_death;
+    p->times_eat = times_eat;
     return (p);
 }
 
@@ -37,6 +38,7 @@ t_settings  *set_settings(int philo, int die, int eat, int sleep)
     s->time_to_die = die;
     s->time_to_eat = eat;
     s->time_to_sleep = sleep;
+    s->times_eat = -1;
     s->are_alive = NULL;
     s->ms_from_start = NULL;
     s->philo = NULL;
