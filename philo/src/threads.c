@@ -40,8 +40,7 @@ t_settings	**set_thread_args(t_philo **p, t_fork **f, t_settings *s, long *t)
 	return (res);
 }
 
-void	wait_threads(t_philo **p, t_settings **args,
-			pthread_mutex_t *m, pthread_mutex_t *print)
+void	wait_threads(t_philo **p, t_settings **args)
 {
 	int	i;
 	int	philo_nbr;
@@ -54,8 +53,8 @@ void	wait_threads(t_philo **p, t_settings **args,
 			printf("Failed to join thread\n");
 		i++;
 	}
-	pthread_mutex_destroy(m);
-	pthread_mutex_destroy(print);
+	pthread_mutex_destroy(args[0]->mutex);
+	pthread_mutex_destroy(args[0]->print);
 	i = 0;
 	while (args && i < philo_nbr)
 		free(args[i++]);
@@ -83,7 +82,7 @@ void	start_threads(t_philo **p, t_settings **args, t_settings *s)
 			i++;
 		}
 	}
-	wait_threads(p, args, &mutex, &print);
+	wait_threads(p, args);
 }
 
 void	set_and_start_threads(t_philo **p, t_fork **f, t_settings *s)

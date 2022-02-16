@@ -63,11 +63,12 @@ void		*routine(void *arg);
 void		go_eat(t_settings *s);
 void		go_sleep(t_settings *s);
 long		get_ms(void);
-void		set_philo_deathtime(t_settings *s, long start);
+void		set_philo_deathtime(t_settings *s, long start, int wait_time);
 //libft
 size_t		ft_strlen(const char *str);
 long		ft_atol_sample(char *numb);
 t_bool		ft_isdigit(int c);
 long		ft_pow(long nb, int power);
 int			ft_strcmp(char *s1, char *s2);
+void		printf_protected(t_settings *s, char *msg, long time, int id);
 #endif
