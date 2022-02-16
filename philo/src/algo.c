@@ -1,11 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   algo.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: amyroshn <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/02/16 11:46:19 by amyroshn          #+#    #+#             */
+/*   Updated: 2022/02/16 12:20:52 by amyroshn         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 #include "../philo.h"
-long	get_current_time_ms(void)
-{
-	struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000L + tv.tv_usec / 1000);
-}
 
 void	take_left_fork(t_settings *s, int left)
 {
@@ -13,20 +17,19 @@ void	take_left_fork(t_settings *s, int left)
 	{
 		s->forks[left]->isfree = FALSE;
 		s->philo->left = s->forks[left];
-		printf("%ld %d has taken a fork\n", get_current_time_ms()
-		- *s->ms_from_start, s->philo->id + 1);
+		printf("%ld %d has taken a fork\n", get_ms()
+			- *s->start, s->philo->id + 1);
 	}
 }
 
 void	take_rigth_fork(t_settings *s, int right)
 {
-
 	if (*s->are_alive && !s->philo->rigth && s->forks[right]->isfree)
 	{
 		s->forks[right]->isfree = FALSE;
 		s->philo->rigth = s->forks[right];
-		printf("%ld %d has taken a fork\n", get_current_time_ms()
-		- *s->ms_from_start, s->philo->id + 1);
+		printf("%ld %d has taken a fork\n", get_ms()
+			- *s->start, s->philo->id + 1);
 	}
 }
 
@@ -57,16 +60,16 @@ void	take_fork(t_settings *s)
 	}
 }
 
-void set_philo_deathtime(t_settings *s, long start)
+void	set_philo_deathtime(t_settings *s, long start)
 {
 	pthread_mutex_lock(s->print);
 	if (*s->are_alive)
 	{
-		s->philo->time_to_death -= (get_current_time_ms() - start);
+		s->philo->time_to_death -= (get_ms() - start);
 		if (*s->are_alive && s->philo->time_to_death < 0)
 		{
-			printf("%ld %d died\n", get_current_time_ms() - *s->ms_from_start,
-					 s->philo->id + 1);
+			printf("%ld %d died\n", get_ms() - *s->start,
+				s->philo->id + 1);
 			*s->are_alive = 0;
 		}
 	}
@@ -81,12 +84,12 @@ void	*routine(void *arg)
 	s = (t_settings *) arg;
 	while (*s->are_alive && s->philo->times_eat != 0)
 	{
-		think_start = get_current_time_ms();
+		think_start = get_ms();
 		pthread_mutex_lock(s->mutex);
 		take_fork(s);
 		pthread_mutex_unlock(s->mutex);
 		set_philo_deathtime(s, think_start);
-		think_start = get_current_time_ms();
+		think_start = get_ms();
 		if (*s->are_alive && s->philo->left && s->philo->rigth)
 		{
 			go_eat(s);

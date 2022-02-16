@@ -1,5 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   threads.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: amyroshn <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/02/16 12:08:22 by amyroshn          #+#    #+#             */
+/*   Updated: 2022/02/16 12:23:44 by amyroshn         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 #include "../philo.h"
-t_settings **set_thread_args(t_philo **p, t_fork **f, t_settings *s, long *t)
+
+t_settings	**set_thread_args(t_philo **p, t_fork **f, t_settings *s, long *t)
 {
 	t_settings	**res;
 	int			i;
@@ -11,7 +23,7 @@ t_settings **set_thread_args(t_philo **p, t_fork **f, t_settings *s, long *t)
 	while (i < s->number_of_philo)
 	{
 		res[i] = set_settings(s->number_of_philo, s->time_to_die,
-								s->time_to_eat, s->time_to_sleep);
+				s->time_to_eat, s->time_to_sleep);
 		if (!res[i])
 		{
 			while (i >= 0)
@@ -21,54 +33,57 @@ t_settings **set_thread_args(t_philo **p, t_fork **f, t_settings *s, long *t)
 		}
 		res[i]->philo = p[i];
 		res[i]->forks = f;
-		res[i]->ms_from_start = t;
+		res[i]->start = t;
 		res[i]->are_alive = t;
 		i++;
 	}
 	return (res);
 }
 
-void	wait_threads(t_philo **p, t_settings **args, pthread_mutex_t *m, pthread_mutex_t *print)
+void	wait_threads(t_philo **p, t_settings **args,
+			pthread_mutex_t *m, pthread_mutex_t *print)
 {
 	int	i;
+	int	philo_nbr;
 
+	philo_nbr = args[0]->number_of_philo;
 	i = 0;
-	while (args && i < args[0]->number_of_philo)
+	while (args && i < philo_nbr)
 	{
 		if (pthread_join(p[i]->thread, NULL) != 0)
-			perror("Failed to join thread\n"); //FIXME
+			printf("Failed to join thread\n");
 		i++;
 	}
 	pthread_mutex_destroy(m);
 	pthread_mutex_destroy(print);
-
+	i = 0;
+	while (args && i < philo_nbr)
+		free(args[i++]);
+	free(args);
 }
 
 void	start_threads(t_philo **p, t_settings **args, t_settings *s)
 {
-	int	i;
+	int				i;
 	pthread_mutex_t	mutex;
 	pthread_mutex_t	print;
 
 	i = 0;
 	if (!args)
-		ft_printf("Malloc error!\n");
-	pthread_mutex_init(&mutex, NULL); //protection
-	pthread_mutex_init(&print, NULL); //protection
-	while (args && i < s->number_of_philo)
+		printf("Malloc error!\n");
+	if (pthread_mutex_init(&mutex, NULL) != 0
+		&& pthread_mutex_init(&print, NULL) != 0)
 	{
-		args[i]->mutex = &mutex;
-		args[i]->print = &print;
-		if (pthread_create(&p[i]->thread, NULL, &routine, args[i]) != 0)
-			perror("failed to created thread\n");
-		i++;
+		while (args && i < s->number_of_philo)
+		{
+			args[i]->mutex = &mutex;
+			args[i]->print = &print;
+			if (pthread_create(&p[i]->thread, NULL, &routine, args[i]) != 0)
+				printf("failed to created thread\n");
+			i++;
+		}
 	}
 	wait_threads(p, args, &mutex, &print);
-
-	i = 0;
-	while (args && i < s->number_of_philo)
-		free(args[i++]);
-	free(args);
 }
 
 void	set_and_start_threads(t_philo **p, t_fork **f, t_settings *s)
@@ -80,7 +95,7 @@ void	set_and_start_threads(t_philo **p, t_fork **f, t_settings *s)
 	if (!start_time)
 		return ;
 	args = set_thread_args(p, f, s, start_time);
-	*start_time = get_current_time_ms();
+	*start_time = get_ms();
 	start_threads(p, args, s);
 	free(start_time);
 }
