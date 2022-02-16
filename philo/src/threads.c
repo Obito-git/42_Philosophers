@@ -6,7 +6,7 @@
 /*   By: amyroshn <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/16 12:08:22 by amyroshn          #+#    #+#             */
-/*   Updated: 2022/02/16 12:23:44 by amyroshn         ###   ########.fr       */
+/*   Updated: 2022/02/16 12:59:23 by amyroshn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "../philo.h"
@@ -71,8 +71,8 @@ void	start_threads(t_philo **p, t_settings **args, t_settings *s)
 	i = 0;
 	if (!args)
 		printf("Malloc error!\n");
-	if (pthread_mutex_init(&mutex, NULL) != 0
-		&& pthread_mutex_init(&print, NULL) != 0)
+	if (pthread_mutex_init(&mutex, NULL) == 0
+		&& pthread_mutex_init(&print, NULL) == 0)
 	{
 		while (args && i < s->number_of_philo)
 		{
